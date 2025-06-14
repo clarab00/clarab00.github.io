@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>A Room of Her Own - Act 1</title>
+  <style>
+    body {
+      font-family: 'Georgia', serif;
+      background-color: #f7f3e9;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    header {
+      background-color: #6e4b3a;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+    .container {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border-radius: 10px;
+    }
+    .map-wrapper {
+      height: 500px;
+      overflow: hidden;
+      margin: 0 auto 1rem;
+      border-radius: 10px;
+      position: relative;
+      display: flex;
+      justify-content: center;
+    }
+    .map-bg {
+      width: 750px;
+      height: auto;
+      object-fit: cover;
+      object-position: top;
+      display: block;
+      position: relative;
+      top: 0;
+    }
+    .location-marker {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 24px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    .location-marker:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+    }
+    .home { background-color: #507054; top: 160px; left: 210px; }
+    .library { background-color: #6e4b3a; top: 320px; left: 500px; }
+    .tutor { background-color: #a37b5f; top: 370px; left: 570px; }
+    .charity { background-color: #8f5e5f; top: 150px; left: 480px; }
+    .publisher { background-color: #f2e3da; top: 300px; left: 295px; }
+    .university {
+      background-color: #4F6E8E;
+      top: 230px;
+      left: 365px;
+      opacity: 0.8;
+      filter: grayscale(100%);
+      cursor: not-allowed;
+    }
+    .salon {
+      background-color: #73291e;
+      top: 320px;
+      left: 380px;
+      opacity: 0.8;
+      filter: grayscale(100%);
+      cursor: not-allowed;
+    }
+    .stats, .inventory, .writing-skill, .family-relationships, .energy {
+      margin-top: 1rem;
+      padding: 0.5rem;
+      background: #f0e6d6;
+      border-radius: 5px;
+    }
+    #minigame {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #fffbe6;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      display: none;
+    }
+    .legend {
+      margin-top: 1rem;
+      padding: 0.5rem;
+      background: #e8f4f8;
+      border-radius: 5px;
+      font-size: 0.9em;
+    }
+    .legend-item {
+      display: inline-block;
+      margin-right: 15px;
+      margin-bottom: 5px;
+    }
+    .legend-color {
+      display: inline-block;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+    .theme {
+      background: #f0f0f0;
+      border-radius: 4px;
+      user-select: none;
+      padding: 8px;
+      margin: 4px;
+      border: 1px solid #aaa;
+      cursor: grab;
+    }
+    .theme.dragging {
+      opacity: 0.5;
+    }
+    .dropzone {
+      background: #fafafa;
+      min-height: 50px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+      margin: 4px;
+      border: 2px dashed #666;
+    }
+    .row {
+      display: flex;
+      gap: 2rem;
+    }
+    .column {
+      flex: 1;
+    }
+    .modal {
+  display: block; /* show by default on page load */
+  text-align: justify;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.6);
+}
+
+.modal-content {
+  background-color: #fff;
+  margin: 10% auto;
+  padding: 2rem;
+  border-radius: 8px;
+  width: 80%;
+  max-width: 600px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  font-family: serif;
+}
+.modal-content button {
+  display: block;
+  margin: 1.5rem auto 0 auto;
+  padding: 0.75rem 2rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  background-color: #507054; 
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.dropzone {
+  border: 1px dashed #aaa;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+  min-height: 60px;
+}
+.book-title {
+  margin-bottom: 0.5rem;
+  font-size: 0.95em;
+}
+.theme {
+  margin-top: 0.25rem;
+  cursor: grab;
+}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>A Room of Her Own – Act 1</h1>
+    <p>Overcome societal expectations and claim your place in literary history as a woman of words.</p>
+  </header>
+<div id="introModal" class="modal">
+  <div class="modal-content">
+    <h2 style="text-align: center;""><strong>Welcome to Vienna, 1890</strong></h2>
+    <p>You play as a determined young woman with dreams of becoming a published author, navigating the significant barriers that society placed in the path of female writers. In an era when women often had to publish under male pseudonyms or face dismissal from literary circles, your character must find creative ways to pursue her passion while contending with societal expectations and limited opportunities.</p>
+    
+    <p><strong>Your Goal:</strong> Complete Act 1 by getting your manuscript published.</p>
+    
+    <p><strong>How to play:</strong></p>
+    <ul>
+        <li>Click locations on the map to visit them and take actions</li>
+        <li>Manage your stats: Writing Skill, Energy, Money, Reputation, and Family Relationships</li>
+        <li>Keep family happy - if relationships drop too low, they'll pressure you to quit!</li>
+    </ul>
+    <p>*Note: Some locations and actions are unlocked in Act 2, which is still in development.</p>
+
+    <button onclick="closeIntroModal()">Start Game</button>
+  </div>
+</div>
+
+
+  <div class="container">
+    <div class="container">
+  <div class="map-wrapper">
+    <img src="images/Wien_Stadtplan_1892_Ausschnitt.jpg" alt="Map of Vienna" class="map-bg">  <!--Map image: Vienna city plan 1892, via Wikimedia Commons (Public Domain)
+-->
+      <div class="location-marker home" onclick="goToLocation('home')" title="Home">🏠</div>
+      <div class="location-marker library" onclick="goToLocation('library')" title="Library">📖</div>
+      <div class="location-marker tutor" onclick="goToLocation('tutor')" title="Private Tutor">👩‍🏫</div>
+      <div class="location-marker charity" onclick="goToLocation('charity')" title="Women's Charity Event">🤝</div>
+      <div class="location-marker publisher" onclick="goToLocation('publisher')" title="Publisher">📚</div>
+      <div class="location-marker university" onclick="goToLocation('university')" title="University (Locked)">👨‍🎓</div>
+      <div class="location-marker salon" onclick="goToLocation('salon')" title="Literary Salon (Locked)">🕯️</div>
+    </div>
+
+    <div class="legend">
+      <strong>Locations:</strong><br>
+      <div class="legend-item">
+        <span class="legend-color" style="background-color: #507054;"></span>🏠 Home
+      </div>
+      <div class="legend-item">
+        <span class="legend-color" style="background-color: #6e4b3a;"></span>📖 Library
+      </div>
+      <div class="legend-item">
+        <span class="legend-color" style="background-color: #a37b5f;"></span>👩‍🏫 Private Tutor
+      </div>
+      <div class="legend-item">
+        <span class="legend-color" style="background-color: #8f5e5f;"></span>🤝 Women's Charity Event
+      </div>
+      <div class="legend-item">
+        <span class="legend-color" style="background-color: #f2e3da;"></span>📚 Publisher
+      </div>
+      <div class="legend-item">
+        <span class="legend-color" style="background-color: #4F6E8E;"></span>👨‍🎓 University (Locked)
+      </div>
+      <div class="legend-item">
+        <span class="legend-color" style="background-color: #73291e;"></span>🕯️ Literary Salon (Locked)
+      </div>
+    </div>
+
+    <div id="story">
+      <p>You are a young woman striving to become a published author. Balance your obligations and choices wisely. Click on the locations above to explore Vienna!</p>
+    </div>
+
+    <div class="writing-skill">
+      <strong>Writing Skill:</strong> <span id="writing">0</span>/100
+    </div>
+    <div class="stats">
+      <strong>Reputation:</strong> <span id="reputation">0</span><br>
+      <strong>Money:</strong> <span id="money">5</span> florins
+    </div>
+    <div class="family-relationships">
+      <strong>Family Relationships:</strong> <span id="family">70</span>/100
+    </div>
+    <div class="energy">
+      <strong>Energy:</strong> <span id="energy">100</span>/100
+    </div>
+    <div class="inventory">
+      <strong>Inventory (Manuscripts):</strong> <span id="inventory">None</span><br>
+      <strong>Pseudonym:</strong> <span id="pseudonym">None</span>
+    </div>
+
+    <div id="minigame"></div>
+  </div>
+
+  <script>
+    // Global Stats
+    let reputation = 0;
+    let money = 5;
+    let writingSkill = 0;
+    let familyRelationships = 70;
+    let energy = 100;
+    let pseudonym = null;
+    let inventory = [];
+    let actionCount = 0;
+
+    // Helper flags
+    let allowanceCut = false;
+    let familyPressureShown = false;
+    let pseudonymPrompted = false;
+
+
+
+
+    // Utility
+    function updateStats() {
+      // Handle allowance cutoff based on family relationships
+      if (familyRelationships < 50 && !allowanceCut) {
+        allowanceCut = true;
+        alert("Seeing your literary ambitions as a distraction from your role at home, your family has cut off financial support.");
+      }
+      if (familyRelationships >= 50 && allowanceCut) {
+        allowanceCut = false;
+        alert("Your family has resumed your allowance.");
+      }
+
+      // Weekly allowance (every 15 actions if not cut off)
+      actionCount++;
+      if (!allowanceCut && actionCount % 15 === 0) {
+        money += 3;
+        document.getElementById('story').innerHTML += `<p style="color: #666; font-style: italic;">(You receive your weekly allowance: +3 florins)</p>`;
+      }
+
+      // Energy cap
+      if (energy > 100) energy = 100;
+      if (energy < 0) energy = 0;
+
+      // Family relationships bounds
+      if (familyRelationships > 100) familyRelationships = 100;
+      if (familyRelationships < 0) familyRelationships = 0;
+
+      // Writing skill max
+      if (writingSkill > 100) writingSkill = 100;
+
+      // Money cap to avoid runaway values
+      if (money > 100) money = 100;
+
+      // Update display
+      document.getElementById('reputation').textContent = reputation;
+      document.getElementById('money').textContent = money;
+      document.getElementById('writing').textContent = writingSkill;
+      document.getElementById('family').textContent = familyRelationships;
+      document.getElementById('energy').textContent = energy;
+      document.getElementById('inventory').textContent = inventory.length > 0 ? inventory.join(', ') : 'None';
+      document.getElementById('pseudonym').textContent = pseudonym || 'None';
+
+      updateMinigameVisibility();
+    }
+
+    // Show/hide minigame section when no minigame running
+    function updateMinigameVisibility() {
+      const minigame = document.getElementById('minigame');
+      if(minigame.innerHTML.trim() === '') {
+        minigame.style.display = 'none';
+      } else {
+        minigame.style.display = 'block';
+      }
+    }
+
+    // --- Location Handlers ---
+
+    function goToLocation(location) {
+      const story = document.getElementById('story');
+      const minigame = document.getElementById('minigame');
+      minigame.innerHTML = '';
+      minigame.style.display = 'none';
+
+      // Check energy
+      if (energy <= 0 && location !== 'home') {
+  story.innerHTML = '<p>You are too exhausted to continue. You should return home to rest.</p>';
+  return;
+}
+
+
+      // Check family pressure
+      if (familyRelationships < 30 && !familyPressureShown) {
+      familyPressureShown = true;  // Set the flag so it only happens once
+      pressureToGiveUp();
+      return;
+  }
+
+      switch(location) {
+        case 'home':
+          homeActions();
+          break;
+
+        case 'library':
+          libraryMinigame();
+          break;
+
+        case 'tutor':
+          privateTutor();
+          break;
+
+        case 'charity':
+          charityEvent();
+          break;
+
+        case 'publisher':
+          publisherVisit();
+          break;
+
+        case 'university':
+          story.innerHTML = `
+            <p><strong>The university gates are firmly shut.</strong> Women are not permitted to study here — at least, not yet.</p>
+            <p style="font-style: italic; color: #555;">(Women were barred from studying at the University of Vienna until 1897.)</p>
+          `;
+          break;
+
+        case 'salon':
+          story.innerHTML = `<p>The literary salon is currently closed to you. Perhaps you will be able to visit once you've published something...</p>`;
+          break;
+
+        default:
+          story.innerHTML = `<p>You wander around, lost in thought.</p>`;
+          break;
+      }
+      updateStats();
+    }
+
+    // --- Home Actions ---
+    function homeActions() {
+  const story = document.getElementById('story');
+
+  if (energy <= 0) {
+    story.innerHTML = `
+      <p>You’re too exhausted to do anything but rest.</p>
+    `;
+    restAtHome();
+    return;
+  }
+
+  let choice = prompt(
+    "You're at home. Choose an action:\n" +
+    "1. Rest (restores energy after 10 seconds wait)\n" +
+    "2. Do chores (+5 family, -10 energy)\n" +
+    "3. Writing Minigame (+5 writing if win, -10 family)\n" +
+    "4. Write Manuscript (adds to inventory)\n" +
+    "Type 1, 2, 3, or 4:"
+  );
+
+  switch(choice) {
+    case '1':
+      restAtHome();
+      break;
+    case '2':
+      doChores();
+      break;
+    case '3':
+      writingMinigame();
+      break;
+    case '4':
+      writeManuscript();
+      break;
+    default:
+      story.innerHTML = `<p>You decide to just sit quietly for a while.</p>`;
+      break;
+  }
+}
+
+
+    // Rest: + energy after 10s delay
+    function restAtHome() {
+      const story = document.getElementById('story');
+      energy += 0; // immediate no change, waiting for 10s to add energy
+      story.innerHTML = `<p>You sit down to rest. Please wait 10 seconds...</p>`;
+      updateStats();
+      setTimeout(() => {
+        energy += 30;
+        if (energy > 100) energy = 100;
+        story.innerHTML = `<p>You feel rested and regain some energy (+30).</p>`;
+        updateStats();
+      }, 10000);
+    }
+
+    // Do chores: + family, - energy
+    function doChores() {
+      const story = document.getElementById('story');
+      if (energy < 10) {
+        story.innerHTML = `<p>You don't have enough energy to do chores. Consider resting.</p>`;
+        return;
+      }
+      energy -= 10;
+      familyRelationships += 5;
+      story.innerHTML = `<p>You do some household chores. Your family appreciates it (+5 family), but it tires you (-10 energy).</p>`;
+      updateStats();
+    }
+
+    // Writing Minigame at home (Synonym Match)
+    function writingMinigame() {
+      const story = document.getElementById('story');
+      const minigame = document.getElementById('minigame');
+
+      if (energy < 10) {
+        story.innerHTML = `<p>You are too tired to write right now. Try resting.</p>`;
+        return;
+      }
+
+      story.innerHTML = `<p>You sit down to write and play a synonym match minigame to sharpen your skills.</p>`;
+
+      const pairs = [
+        ['happy', 'joyful'],
+        ['quick', 'fast'],
+        ['smart', 'intelligent'],
+        ['sad', 'unhappy'],
+        ['big', 'large'],
+        ['easy', 'simple'],
+        ['strong', 'powerful'],
+        ['quiet', 'silent'],
+      ];
+
+      // Pick random synonym pair
+      const pair = pairs[Math.floor(Math.random() * pairs.length)];
+      const word = pair[0];
+      const synonym = pair[1];
+
+      minigame.style.display = 'block';
+      minigame.innerHTML = `
+        <p>Find the synonym of "<strong>${word}</strong>":</p>
+        <input type="text" id="answer" autofocus />
+        <button onclick="checkSynonymAnswer('${synonym}', 'home')">Submit</button>
+        <button onclick="cancelMinigame()">Cancel</button>
+      `;
+    }
+
+    // Check synonym answer
+    function checkSynonymAnswer(correctAnswer, context) {
+      const input = document.getElementById('answer');
+      const userAnswer = input.value.trim().toLowerCase();
+      const minigame = document.getElementById('minigame');
+      const story = document.getElementById('story');
+
+      if (userAnswer === correctAnswer.toLowerCase()) {
+        if(context === 'home') {
+          writingSkill += 5;
+          familyRelationships -= 10;
+          energy -= 10;
+          story.innerHTML = `<p>Correct! Your writing skill improves (+5), but your family feels neglected (-10 family). You also feel a bit tired (-10 energy).</p>`;
+        } 
+      } else {
+        story.innerHTML = `<p>That's not quite right. Keep practicing!</p>`;
+      }
+      minigame.innerHTML = '';
+      minigame.style.display = 'none';
+      checkForPseudonymPrompt();
+      updateStats();
+    }
+
+    // Cancel minigame
+    function cancelMinigame() {
+      document.getElementById('minigame').innerHTML = '';
+      document.getElementById('minigame').style.display = 'none';
+      document.getElementById('story').innerHTML = `<p>You stop the minigame and take a break.</p>`;
+    }
+
+    // Write Manuscript - choose genre, add to inventory
+    function writeManuscript() {
+      const story = document.getElementById('story');
+      if (energy < 15) {
+        story.innerHTML = `<p>You don't have enough energy to write a manuscript. Consider resting.</p>`;
+        return;
+      }
+      energy -= 15;
+
+      let genre = prompt(
+        "Choose a manuscript genre:\n" +
+        "1. Psychological Novella\n" +
+        "2. Romantic Novel\n" +
+        "3. Historical Fiction\n" +
+        "4. Political Essay\n" +
+        "Type 1, 2, 3 or 4:"
+      );
+      let genreName;
+
+      switch(genre) {
+        case '1': genreName = "Psychological Novella"; break;
+        case '2': genreName = "Romantic Novel"; break;
+        case '3': genreName = "Historical Fiction"; break;
+        case '4': genreName = "Political Essay"; break;
+        default:
+          story.innerHTML = `<p>You decide not to write a manuscript now.</p>`;
+          updateStats();
+          return;
+      }
+
+      inventory.push(genreName);
+      story.innerHTML = `<p>You complete a new manuscript: <strong>${genreName}</strong> and add it to your inventory.</p>`;
+      updateStats();
+    }
+
+    // --- Library Minigame ---
+  function libraryMinigame() {
+  const story = document.getElementById('story');
+  const minigame = document.getElementById('minigame');
+
+  if (energy < 5) {
+    story.innerHTML = `<p>You are too tired to study at the library. Try resting.</p>`;
+    return;
+  }
+
+  energy -= 5;
+  updateStats();
+
+  story.innerHTML = `<p>You visit the library and challenge yourself with a study matching minigame. Scroll down to play!</p>`;
+
+  // Author-book pairs
+  const pairs = [
+    { author: 'Marie von Ebner-Eschenbach', book: 'Krambambuli' },
+    { author: 'Mary Shelley', book: 'Frankenstein' },
+    { author: 'William Shakespeare', book: 'Romeo and Juliet' },
+    { author: 'Emily Brontë', book: 'Wuthering Heights' },
+    { author: 'Jane Austen', book: 'Pride and Prejudice' },
+    { author: 'Leo Tolstoy', book: 'War and Peace' },
+    { author: 'Bertha von Suttner', book: 'Die Waffen nieder!' },
+    { author: 'Homer', book: 'The Odyssey' },
+    { author: 'Johann Wolfgang von Goethe', book: 'Faust' },
+    { author: 'Louisa May Alcott', book: 'Little Women' }
+
+  ];
+
+  // Shuffle helper
+  function shuffle(array) {
+    return array.sort(() => Math.random() - 0.5);
+  }
+
+  // Randomly pick 3 pairs
+  const selectedPairs = shuffle(pairs).slice(0, 3);
+
+  // Assign match IDs
+  selectedPairs.forEach((pair, index) => pair.matchId = index + 1);
+
+  // Shuffle authors and books separately
+  const authors = shuffle([...selectedPairs]);
+  const books = shuffle([...selectedPairs]);
+
+  // Generate HTML dynamically
+  const authorHTML = authors.map(pair =>
+    `<div class="theme" draggable="true" data-match="${pair.matchId}">${pair.author}</div>`
+  ).join('');
+
+  const bookHTML = books.map(pair =>
+  `<div class="dropzone" data-match="${pair.matchId}">
+     <div class="book-title"><strong>${pair.book}</strong></div>
+  </div>`
+).join('');
+
+  // Render the game
+  minigame.style.display = 'block';
+  minigame.innerHTML = `
+    <h2>Study Other Authors</h2>
+    <div class="row">
+      <div class="column">
+        <h4>Authors</h4>
+        <p style="font-size: 0.9em; color: #666; margin-bottom: 1rem;">
+          <em>"To learn the craft, one must study the masters. These people have paved the way..."</em>
+        </p>
+        ${authorHTML}
+      </div>
+      <div class="column">
+        <h4>Their Famous Works</h4>
+        <p style="font-size: 0.9em; color: #666; margin-bottom: 1rem;">
+          <em>Match each author to their work</em>
+        </p>
+        ${bookHTML}
+      </div>
+    </div>
+    <button onclick="submitLibraryMatch()">Submit Answers</button>
+    <button onclick="cancelMinigame()">Cancel</button>
+  `;
+
+  // Add drag and drop event listeners
+  const themes = minigame.querySelectorAll('.theme');
+  const dropzones = minigame.querySelectorAll('.dropzone');
+
+  themes.forEach(theme => {
+    theme.addEventListener('dragstart', dragStart);
+  });
+
+  dropzones.forEach(zone => {
+    zone.addEventListener('dragover', dragOver);
+    zone.addEventListener('drop', drop);
+  });
+
+  // Drag & Drop functions
+  function dragStart(e) {
+    e.dataTransfer.setData('text/plain', e.target.dataset.match);
+    e.dataTransfer.effectAllowed = 'move';
+    e.target.classList.add('dragging');
+  }
+
+  function dragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  }
+
+  function drop(e) {
+  e.preventDefault();
+  const draggedMatch = e.dataTransfer.getData('text/plain');
+  const draggedElement = minigame.querySelector(`.theme[data-match='${draggedMatch}'].dragging`);
+
+  if (!draggedElement) return;
+
+  draggedElement.classList.remove('dragging');
+
+  // Ensure we don't double-insert the same element
+  if (e.currentTarget.contains(draggedElement)) return;
+
+  // If author already dropped here, replace it
+  const existingAuthor = e.currentTarget.querySelector('.theme');
+  if (existingAuthor) {
+    existingAuthor.remove();
+  }
+
+  e.currentTarget.appendChild(draggedElement);
+}
+
+}
+
+function submitLibraryMatch() {
+  const minigame = document.getElementById('minigame');
+  const story = document.getElementById('story');
+  const dropzones = minigame.querySelectorAll('.dropzone');
+
+  let correctCount = 0;
+  dropzones.forEach(dz => {
+    const author = dz.querySelector('.theme');
+    if (author && author.dataset.match === dz.dataset.match) {
+      correctCount++;
+    }
+  });
+
+  if (correctCount === dropzones.length) {
+    writingSkill += 7;
+    energy -= 10;
+    story.innerHTML = `<p>Excellent! You correctly matched all authors and their famous works. Your writing skill improves (+7), but you feel a bit tired (-10).</p>`;
+  } else {
+    story.innerHTML = `<p>You got ${correctCount} out of ${dropzones.length} matches correct. Keep studying and try again.</p>`;
+  }
+
+  minigame.innerHTML = '';
+  minigame.style.display = 'none';
+  checkForPseudonymPrompt();
+  updateStats();
+}
+
+
+
+   function privateTutor() {
+  const story = document.getElementById('story');
+
+  if (money < 2) {
+    story.innerHTML = `<p>You don't have enough money to pay for the tutor. (Cost: 2 florins)</p>`;
+    return;
+  }
+  if (energy < 5) {
+    story.innerHTML = `<p>You are too tired for a tutoring session. Consider resting.</p>`;
+    return;
+  }
+
+  money -= 2;
+  writingSkill += 10;
+  energy -= 5;
+  familyRelationships -= 5;
+
+  story.innerHTML = `<p>You pay 2 florins for a private tutor session. Your writing skill improves significantly (+10), but it leaves you a bit tired (-5 energy). Your family is frustrated that you spend so little time at home (-5 family).</p>`;
+
+  checkForPseudonymPrompt(); 
+
+  updateStats();
+
+}
+
+    // --- Women's Charity Event ---
+    function charityEvent() {
+      const story = document.getElementById('story');
+      if (energy < 10) {
+        story.innerHTML = `<p>You are too tired to attend the charity event. Consider resting.</p>`;
+        return;
+      }
+      energy -= 20;
+      reputation += 5;
+      story.innerHTML = `<p>You attend the women's charity event. Your reputation improves (+5), but it tires you (-20 energy).</p>`;
+      updateStats();
+    }
+
+    // --- Publisher ---
+    function publisherVisit() {
+      const story = document.getElementById('story');
+
+      if(inventory.length === 0) {
+        story.innerHTML = `<p>You have no manuscripts to submit. Write one first.</p>`;
+        return;
+      }
+
+      let manuscriptList = inventory.map((m, i) => `${i+1}. ${m}`).join('\n');
+      let choice = prompt(
+        `Choose a manuscript to submit:\n${manuscriptList}\nEnter the number of your choice:`
+      );
+
+      let idx = parseInt(choice) - 1;
+      if (isNaN(idx) || idx < 0 || idx >= inventory.length) {
+        story.innerHTML = `<p>Invalid choice. You decide not to submit anything now.</p>`;
+        return;
+      }
+
+      let manuscript = inventory[idx];
+      // Decide if published: writing skill >= 70 OR writing skill >=50 with pseudonym
+      let published = false;
+      if (writingSkill >= 70) {
+        published = true;
+      } else if (writingSkill >= 50 && pseudonym) {
+        published = true;
+      }
+
+      if (!published) {
+        story.innerHTML = `<p>Your manuscript was rejected by the publisher. Keep improving!</p>`;
+        return;
+      }
+
+      // Remove manuscript from inventory
+      inventory.splice(idx, 1);
+
+      // Different reactions by genre
+      let reaction = '';
+      switch(manuscript) {
+        case 'Psychological Novella':
+          reaction = 'The publisher praises your deep insight but worries about market interest.';
+          break;
+        case 'Romantic Novel':
+          reaction = 'Your romantic novel is seen as fitting for a female writer and has good prospects.';
+          break;
+        case 'Historical Fiction':
+          reaction = 'Your historical fiction is respected but considered niche.';
+          break;
+        case 'Political Essay':
+          reaction = 'Your bold political essay causes some raised eyebrows and debate.';
+          break;
+        default:
+          reaction = 'The manuscript receives a neutral reception.';
+      }
+
+      story.innerHTML = `<p>Congratulations! Your manuscript <strong>${manuscript}</strong> has been accepted and published.</p><p>${reaction}</p><p><strong>Act One complete!</strong> You have achieved your goal.</p>`;
+      alert('You have completed Act One by getting published!');
+
+
+    }
+
+
+
+    // --- Family Pressure Dialog ---
+    function pressureToGiveUp() {
+    const story = document.getElementById('story');
+    let choice = prompt(
+      "Your father storms into your room, his face red with anger. 'Enough of this foolishness!' he shouts, sweeping your papers to the floor. 'You've brought shame upon this family with your unwomanly pursuits! No decent man will marry a woman who thinks herself a writer!'\n\n" +
+      "Your mother stands behind him, tears in her eyes. 'Please, dear,' she whispers, 'just give up this writing nonsense. You're tearing our family apart.'\n\n" +
+      "The weight of their disappointment crushes down on you. Will you abandon your dreams?\n\n" +
+      "Do you give up writing? (yes/no)"
+    );
+    
+    if (choice && choice.toLowerCase() === 'yes') {
+      story.innerHTML = `<p>With trembling hands, you gather your scattered papers and throw them into the fire. The flames consume your words, your dreams, your very soul. You have chosen family over freedom.</p><p><strong>Game Over.</strong></p>`;
+      document.querySelectorAll('.location-marker').forEach(el => el.style.pointerEvents = 'none');
+    } else {
+      story.innerHTML = `<p>You steel yourself against their words. 'I will not be silenced,' you declare, your voice shaking but determined. 'My words matter, and I will be heard.' The rift in your family deepens, but your resolve grows stronger.</p>`;
+    }
+  }
+
+    // --- Extra: set pseudonym manually ---
+    function setPseudonym() {
+      let name = prompt("Enter a male pseudonym:");
+      if (name && name.trim() !== '') {
+        pseudonym = name.trim();
+        alert(`You are now publishing under the pseudonym: ${pseudonym}`);
+      } else {
+        pseudonym = null;
+        alert("You chose not to use a pseudonym.");
+      }
+      updateStats();
+    }
+
+
+    // Initial stats update
+    updateStats();
+
+    function closeIntroModal() {
+  document.getElementById('introModal').style.display = 'none';
+}
+
+function checkForPseudonymPrompt() {
+  if (writingSkill >= 50 && !pseudonym && !pseudonymPrompted) {
+    pseudonymPrompted = true;
+
+    let choice = prompt(
+      "You run into your tutor on the street. He greets you warmly, then glances around and says quietly, 'Your writing is excellent, truly. But if you want it to *sell*, you may need to adopt a gentleman’s name. It pains me to say it, but editors are more likely to take such work seriously.'\n" +
+      "1. Yes, choose a pseudonym\n" +
+      "2. No, I’ll publish under my own name\n\n" +
+      "Type 1 or 2:"
+    );
+
+    const story = document.getElementById('story');
+
+    if (choice === '1') {
+      setPseudonym();
+      story.innerHTML += `<p>You adopt a pseudonym, hoping it opens doors otherwise closed to you.</p>`;
+    } else {
+      story.innerHTML += `<p>You choose to write under your own name, come what may.</p>`;
+    }
+
+    updateStats();
+  }
+}
+
+  </script>
+
+</div>
+</body>
+</html>
